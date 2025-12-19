@@ -4,14 +4,17 @@ import SensorValue from "../SensorValue";
 import TimeAgo from "../TimeAgo";
 
 const decoder = new TextDecoder("utf-8"); // TODO: Add a polyfill for this.
-const SENSOR_SERVICE_UUID = "f0cd1400-95da-4f4b-9ac8-aa55d312af0c";
+
+const SENSOR_VALUES_CHARACTERISTIC_UUID = "f0cd1503-95da-4f4b-9ac8-aa55d312af0c";
+const LAST_UPDATED_CHARACTERISTIC_UUID = "f0cd2004-95da-4f4b-9ac8-aa55d312af0c";
+const UPDATE_INTERVAL_CHARACTERISTIC_UUID = "f0cd2002-95da-4f4b-9ac8-aa55d312af0c";
 
 const aranetServices = {
   sensor: {
-    serviceUuid: SENSOR_SERVICE_UUID,
+    serviceUuid: 0xFCE0,
     resolvers: {
       // Sensor values.
-      "f0cd3001-95da-4f4b-9ac8-aa55d312af0c": (value) => {
+      [SENSOR_VALUES_CHARACTERISTIC_UUID]: (value) => {
         return {
           co2: value.getUint16(0, true),
           temperature: value.getUint16(2, true) / 20,
@@ -21,10 +24,10 @@ const aranetServices = {
         };
       },
       // Seconds since the last sensor update.
-      "f0cd2004-95da-4f4b-9ac8-aa55d312af0c": (value) =>
+      [LAST_UPDATED_CHARACTERISTIC_UUID]: (value) =>
         Math.floor(Date.now() / 1000) - value.getUint16(0, true),
       // Configured interval in seconds between the updates.
-      "f0cd2002-95da-4f4b-9ac8-aa55d312af0c": (value) =>
+      [UPDATE_INTERVAL_CHARACTERISTIC_UUID]: (value) =>
         value.getUint16(0, true),
     },
   },
@@ -42,11 +45,11 @@ const aranetServices = {
 
 const aranet4Device = new BleDevice(navigator.bluetooth, {
   filters: [
-    {
-      services: [SENSOR_SERVICE_UUID],
+    { 
+      services: [0xFCE0],
     },
   ],
-  optionalServices: ["device_information", "battery_service"],
+  optionalServices: [0xFCE0, "device_information", "battery_service"],
 });
 
 export default class Aranet4 extends React.Component {
@@ -77,18 +80,28 @@ export default class Aranet4 extends React.Component {
         aranetServices.sensor.resolvers
       )
       .then((sensorReadings) => {
+        const sensorValues = sensorReadings.find(
+          (r) => r.uuid === SENSOR_VALUES_CHARACTERISTIC_UUID
+        ).value;
+        const lastUpdated = sensorReadings.find(
+          (r) => r.uuid === LAST_UPDATED_CHARACTERISTIC_UUID
+        ).value;
+        const updateInterval = sensorReadings.find(
+          (r) => r.uuid === UPDATE_INTERVAL_CHARACTERISTIC_UUID
+        ).value;
+
         this.setState({
           error: null,
           connected: true,
           sensorValues: {
-            co2: String(sensorReadings[2].value.co2), // TODO: Don't assume the order of things -- lookup by the UUID instead.
-            temperature: String(sensorReadings[2].value.temperature),
-            pressure: String(sensorReadings[2].value.pressure),
-            humidity: String(sensorReadings[2].value.humidity),
-            battery: String(sensorReadings[2].value.battery),
+            co2: String(sensorValues.co2),
+            temperature: String(sensorValues.temperature),
+            pressure: String(sensorValues.pressure),
+            humidity: String(sensorValues.humidity),
+            battery: String(sensorValues.battery),
           },
-          lastUpdated: new Date(sensorReadings[1].value * 1000),
-          updateInterval: sensorReadings[0].value,
+          lastUpdated: new Date(lastUpdated * 1000),
+          updateInterval: updateInterval,
         });
       })
       .catch((err) => {

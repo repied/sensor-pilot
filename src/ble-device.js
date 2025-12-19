@@ -32,23 +32,17 @@ export default class BleDevice {
   }
 
   serviceCharacteristics(serviceUuid, characteristicResolvers) {
-    const characteristicUuids = Object.keys(characteristicResolvers).map(
-      (name) => BluetoothUUID.getCharacteristic(name)
-    );
+    const characteristicUuids = Object.keys(characteristicResolvers);
 
     return this.getGATTServer()
       .then((server) => server.getPrimaryService(serviceUuid))
-      .then((service) => service.getCharacteristics())
-      .then((characteristics) => {
+      .then((service) => {
         return Promise.all(
-          characteristics
-            .filter((characteristic) =>
-              characteristicUuids.includes(characteristic.uuid)
-            )
-            .map(async (characteristic) => ({
-              uuid: characteristic.uuid,
-              value: await characteristic.readValue(),
-            }))
+          characteristicUuids.map(async (uuid) => {
+            const characteristic = await service.getCharacteristic(uuid);
+            const value = await characteristic.readValue();
+            return { uuid, value };
+          })
         );
       })
       .then((values) =>
