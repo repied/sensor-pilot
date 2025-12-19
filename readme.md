@@ -4,11 +4,9 @@
 
 A progressive web app (PWA) for interacting with Bluetooth LE (low-energy) sensors using a web browser 🎉. Visit [kasparsd.github.io/sensor-pilot](https://kasparsd.github.io/sensor-pilot/).
 
-
 ## Supported Sensors
 
 - [Aranet 4](https://aranet4.com)
-
 
 ## Credits
 

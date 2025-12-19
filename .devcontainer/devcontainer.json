@@ -1,0 +1,15 @@
+{
+  "name": "sensor-pilot (Node)",
+  "image": "mcr.microsoft.com/vscode/devcontainers/javascript-node",
+  "forwardPorts": [5000],
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+  "postCreateCommand": "npm install",
+  "postStartCommand": "echo 'Dev container ready'",
+  "customizations": {
+    "vscode": {
+      "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"]
+    }
+  },
+  "remoteUser": "root" // not ideal for security, but easier than having a docker file
+}

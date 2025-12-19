@@ -1,42 +1,44 @@
-import React from 'react'
-import PropTypes from 'prop-types'
+import React from "react";
+import PropTypes from "prop-types";
 
 export default class TimeAgo extends React.Component {
-  constructor (props) {
-    super(props)
+  constructor(props) {
+    super(props);
 
     this.state = {
       timeNow: new Date(),
-    }
+    };
   }
 
-  tick () {
+  tick() {
     this.setState({
       timeNow: new Date(),
-    })
+    });
   }
 
-  componentDidMount () {
-    this.interval = setInterval(() => this.tick(), 1000)
+  componentDidMount() {
+    this.interval = setInterval(() => this.tick(), 1000);
   }
 
-  componentWillUnmount () {
-    clearInterval(this.interval)
+  componentWillUnmount() {
+    clearInterval(this.interval);
   }
 
-  dateToTimestamp (date) {
-    return Math.floor(date.getTime() / 1000)
+  dateToTimestamp(date) {
+    return Math.floor(date.getTime() / 1000);
   }
 
-  render () {
+  render() {
     return (
       <span className="time-ago">
-        {this.dateToTimestamp(this.state.timeNow) - this.dateToTimestamp(this.props.timestamp)} seconds ago
+        {this.dateToTimestamp(this.state.timeNow) -
+          this.dateToTimestamp(this.props.timestamp)}{" "}
+        seconds ago
       </span>
-    )
+    );
   }
 }
 
 TimeAgo.propTypes = {
   timestamp: PropTypes.date,
-}
+};
