@@ -1,5 +1,5 @@
-@import "custom";
-@import "bootstrap/scss/bootstrap";
+@use "custom";
+@use "bootstrap/scss/bootstrap";
 
 .navbar-brand-icon {
 	height: 2em;
